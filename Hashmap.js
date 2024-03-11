@@ -1,3 +1,5 @@
+import createList from './linkedlist.js';
+
 export default class HashMap {
   constructor() {
     this.buckets = new Array(16);
