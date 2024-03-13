@@ -1,8 +1,9 @@
-import createNode from './nodefactory.js';
+import createKeyNode from './nodefactory.js';
 
-export default function createList() {
-  let head = createNode();
+export default function createList(storeObjectBool = false) {
+  let head = createKeyNode();
   let size = 0;
+  const storeObject = storeObjectBool;
 
   const findNull = node => {
     if (node.next === null) {
@@ -44,35 +45,68 @@ export default function createList() {
     return 'index too small';
   };
 
-  const checkValue = (value, node, ...indx) => {
+  // const checker = (value, node) => {
+  //   if (storeObject === true) {
+  //     if (toString(Object.keys(node.value)) === toString(value)) {
+  //       return true;
+  //     }
+  //     return false;
+  //   }
+  //   if (node.value === value) {
+  //     return true;
+  //   }
+  //   return false;
+  // };
+
+  // const checkValue = (value, node, ...indx) => {
+  //   if (indx.length > 0) {
+  //     const i = indx[0];
+  //     if (checker(value, node)) return i;
+  //     if (node.next === null) return false;
+  //     return checkValue(value, node.next, i + 1);
+  //   }
+  //   // if (node.value === value) return node;
+  //   // if (node.next === null) return false;
+  //   if (checker(value, node)) return node;
+  //   if (node.next === null) return false;
+  //   return checkValue(value, node.next);
+  // };
+
+  const checkKey = (key, node, ...indx) => {
     if (indx.length > 0) {
       const i = indx[0];
-      if (node.value === value) return i;
+      if (node.key === key) return i;
       if (node.next === null) return false;
-      return checkValue(value, node.next, i + 1);
+      return checkKey(key, node.next, i + 1);
     }
-    if (node.value === value) return node;
+
+    if (node.key === key) return node;
     if (node.next === null) return false;
-    return checkValue(value, node.next);
+    return checkKey(key, node.next);
   };
 
-  const contains = value => {
-    const node = checkValue(value, getHead());
-    if (node !== false) return true;
-    return node;
+  const getNodeWithKey = key => {
+    const node = checkKey(key, getHead());
+    if (node !== false) return node;
+    return false;
   };
 
-  const find = value => {
-    const node = checkValue(value, getHead(), 0);
-    return node;
+  const contains = key => {
+    if (getNodeWithKey(key) !== false) return true;
+    return false;
+  };
+
+  const find = key => {
+    const indx = checkKey(key, getHead(), 0);
+    return indx;
   };
 
   const returnEveryValue = (node, string) => {
     if (node.next === null) {
-      const newStr = `${string}( ${node.value} ) -> null`;
+      const newStr = `${string}( ${node.key}: ${node.value} ) -> null`;
       return newStr;
     }
-    const newStr = `${string}( ${node.value} ) -> `;
+    const newStr = `${string}( ${node.key}: ${node.value} ) -> `;
     return returnEveryValue(node.next, newStr);
   };
 
@@ -80,6 +114,7 @@ export default function createList() {
 
   const pop = () => {
     if (getHead().next === null) {
+      getHead().key = null;
       getHead().value = null;
       decreaseSize();
     } else {
@@ -104,37 +139,39 @@ export default function createList() {
     console.log(getHead());
   };
 
-  const append = val => {
-    if (getHead().value === null) {
+  const updateValue = (value, index) => {
+    const node = at(index);
+    node.value = value;
+  };
+
+  const append = (key, val) => {
+    if (getHead().key === null) {
+      getHead().key = key;
       getHead().value = val;
       increaseSize();
     } else {
       const lastNode = findNull(getHead());
-      lastNode.next = createNode(val);
+      lastNode.next = createKeyNode(key, val);
       increaseSize();
     }
   };
 
-  const prepend = val => {
-    const newNode = createNode(val, getHead());
+  const prepend = (key, val) => {
+    const newNode = createKeyNode(key, val, getHead());
     head = newNode;
     increaseSize();
   };
 
   return {
     append,
-    getHead,
-    logList,
-    logHead,
     prepend,
-    increaseSize,
-    decreaseSize,
     getSize,
-    tail,
     at,
+    updateValue,
     pop,
     contains,
     find,
     stringify,
+    getNodeWithKey,
   };
 }

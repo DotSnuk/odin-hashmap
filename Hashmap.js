@@ -2,16 +2,11 @@ import createList from './linkedlist.js';
 
 export default class HashMap {
   constructor() {
-    this.buckets = new Array(16);
+    this.buckets = [];
     this.mod = 16;
     this.capacity = 0;
     this.loadFactor = 0.75;
-  }
-
-  checkBucketsLength(index) {
-    if (index < 0 || index >= this.buckets.length) {
-      throw new Error('Trying to access index out of bound');
-    }
+    this.initBucket(16);
   }
 
   hash(key) {
@@ -23,6 +18,19 @@ export default class HashMap {
     return this.hashCode;
   }
 
+  initBucket(size) {
+    for (let i = 0; i < size; i += 1) {
+      const newList = createList();
+      this.buckets[i] = newList;
+    }
+  }
+
+  checkBucketsLength(index) {
+    if (index < 0 || index >= this.buckets.length) {
+      throw new Error('Trying to access index out of bound');
+    }
+  }
+
   calcLoad() {
     const currLoad = this.capacity / this.buckets.length;
     console.log(`Current load: ${currLoad}`);
@@ -31,16 +39,47 @@ export default class HashMap {
 
   increaseCapacity() {
     this.capacity += 1;
+    this.calcLoad();
+  }
+
+  updateValue(hashkey, value, indx) {
+    this.buckets[hashkey].updateValue(value, indx);
+  }
+
+  appendKey(hashkey, key, value) {
+    this.buckets[hashkey].append(key, value);
+    this.increaseCapacity();
+  }
+
+  compareKey(hashkey, key, value) {
+    const indx = this.buckets[hashkey].find(key);
+    if (indx !== false) {
+      this.updateValue(hashkey, value, indx);
+    } else {
+      this.appendKey(hashkey, key, value);
+    }
+  }
+
+  has(key) {
+    const hashkey = this.hash(key);
+  }
+
+  get(key) {
+    const hashkey = this.hash(key);
+    const node = this.buckets[hashkey].getNodeWithKey(key);
+    if (node !== false) return node.value;
+    return null;
   }
 
   set(key, value) {
-    const node = { [key]: value };
     const hashkey = this.hash(key);
-    if (this.buckets[hashkey] === undefined) {
+    console.log(hashkey);
+    if (this.buckets[hashkey].getSize() === 0) {
       this.checkBucketsLength(hashkey);
-      this.buckets[hashkey] = node;
+      this.buckets[hashkey].append(key, value);
       this.increaseCapacity();
-      this.calcLoad();
+      return;
     }
+    this.compareKey(hashkey, key, value);
   }
 }
