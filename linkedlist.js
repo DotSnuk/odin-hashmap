@@ -45,6 +45,43 @@ export default function createList(storeObjectBool = false) {
     return 'index too small';
   };
 
+  const pop = () => {
+    if (getHead().next === null) {
+      getHead().key = null;
+      getHead().value = null;
+      decreaseSize();
+    } else {
+      const newLastNode = findSecondLastNull(getHead());
+      newLastNode.next = null;
+      decreaseSize();
+    }
+  };
+
+  const getSize = () => size;
+
+  const removeAt = index => {
+    if (index === 0) {
+      if (getSize() > 1) {
+        head = head.next;
+        decreaseSize();
+        return true;
+      }
+      pop();
+      decreaseSize();
+      return true;
+    }
+    if (index > 0) {
+      if (at(index).next !== null) {
+        at(index - 1).next = at(index).next;
+        decreaseSize();
+        return true;
+      }
+      at(index - 1).next = null;
+      decreaseSize();
+      return true;
+    }
+  };
+
   // const checker = (value, node) => {
   //   if (storeObject === true) {
   //     if (toString(Object.keys(node.value)) === toString(value)) {
@@ -79,7 +116,6 @@ export default function createList(storeObjectBool = false) {
       if (node.next === null) return false;
       return checkKey(key, node.next, i + 1);
     }
-
     if (node.key === key) return node;
     if (node.next === null) return false;
     return checkKey(key, node.next);
@@ -112,33 +148,6 @@ export default function createList(storeObjectBool = false) {
 
   const stringify = () => returnEveryValue(getHead(), '');
 
-  const pop = () => {
-    if (getHead().next === null) {
-      getHead().key = null;
-      getHead().value = null;
-      decreaseSize();
-    } else {
-      const newLastNode = findSecondLastNull(getHead());
-      newLastNode.next = null;
-      decreaseSize();
-    }
-  };
-
-  const getSize = () => size;
-
-  const logList = node => {
-    if (node.next !== null) {
-      console.log(node.value);
-      logList(node.next);
-    } else {
-      console.log(node.value);
-    }
-  };
-
-  const logHead = () => {
-    console.log(getHead());
-  };
-
   const updateValue = (value, index) => {
     const node = at(index);
     node.value = value;
@@ -167,6 +176,7 @@ export default function createList(storeObjectBool = false) {
     prepend,
     getSize,
     at,
+    removeAt,
     updateValue,
     pop,
     contains,
